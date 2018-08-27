@@ -69,15 +69,6 @@ namespace Proxy
 					var consumer = SendUpdates(buffer, responseStream, cancel);
 					var producer = ReceiveUpdates(request, buffer, cancel);
 					await Task.WhenAll(producer, consumer);
-
-					//var cancel = context.CancellationToken;
-					//var subscription = m_client.Subscribe(request);
-					//while (await subscription.ResponseStream.MoveNext(cancel))
-					//{
-					//	var data = subscription.ResponseStream.Current;
-					//	await responseStream.WriteAsync(data);
-					//}
-					//throw new RpcException(subscription.GetStatus());
 				}
 				catch (Exception ex)
 				{

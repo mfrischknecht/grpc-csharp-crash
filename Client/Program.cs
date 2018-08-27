@@ -29,8 +29,6 @@ namespace Client
 							{
 								var msg = subscription.ResponseStream.Current;
 								Interlocked.Increment(ref m_receivedMessages);
-								//var timestamp = msg.Timestamp.ToDateTime();
-								//Console.WriteLine($"Update: {timestamp:o}");
 							}
 						}
 						catch (Exception ex)
