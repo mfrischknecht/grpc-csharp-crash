@@ -1,0 +1,41 @@
+﻿
+
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package grpctest;
+
+service Pricefeed {
+  rpc Subscribe (PriceUpdateSubscription) returns (stream PriceUpdate) {}
+}
+
+message PriceUpdateSubscription {
+	string isin              = 1;
+	string currency          = 2;
+	string security_exchange = 3;
+	int32  no_levels         = 4;
+}
+
+message PriceUpdate {
+	message Side {
+		double price     = 1;
+		double quantity  = 2;
+		int32  no_orders = 3;
+		int32  no_quotes = 4;
+	}
+
+	message Level {
+		int32 level = 1;
+		Side  bid   = 2;
+		Side  ask   = 3;
+	}
+
+	repeated Level            price_updates           = 2;
+	         double           last_price              = 3;
+	         double           closing_price           = 5;
+	google.protobuf.Timestamp timestamp               = 1;
+	google.protobuf.Timestamp last_price_timestamp    = 4;
+	google.protobuf.Timestamp closing_price_timestamp = 6;
+}
+
