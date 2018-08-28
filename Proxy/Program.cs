@@ -14,7 +14,7 @@ namespace Proxy
 	{
 		private sealed class Service : Pricefeed.PricefeedBase
 		{
-			private readonly Pricefeed.PricefeedClient m_client; 
+			private readonly Pricefeed.PricefeedClient m_client;
 
 			public Service(Pricefeed.PricefeedClient client)
 			{
@@ -22,53 +22,16 @@ namespace Proxy
 				m_client = client;
 			}
 
-			private async Task ReceiveUpdates(PriceUpdateSubscription request, ITargetBlock<PriceUpdate> output, CancellationToken cancel)
+			public async override Task Subscribe(PriceUpdateSubscription request, IServerStreamWriter<PriceUpdate> responseStream, ServerCallContext context)
 			{
 				try
 				{
 					var httpRequest = m_client.Subscribe(request);
 					var subscription = httpRequest.ResponseStream;
-					while (await subscription.MoveNext(cancel))
-					{
-						var data = subscription.Current;
-						await output.SendAsync(data, cancel);
-					}
+					while (await subscription.MoveNext(context.CancellationToken))
+						await responseStream.WriteAsync(subscription.Current);
+
 					throw new RpcException(httpRequest.GetStatus());
-				}
-				catch (Exception ex)
-				{
-					Console.Error.WriteLine(ex);
-					throw;
-				}
-			}
-
-			private async Task SendUpdates(ISourceBlock<PriceUpdate> input, IServerStreamWriter<PriceUpdate> output, CancellationToken cancel)
-			{
-				try
-				{
-					while (true)
-					{
-						var data = await input.ReceiveAsync(cancel);
-						await output.WriteAsync(data);
-					}
-				}
-				catch (Exception ex)
-				{
-					Console.Error.WriteLine(ex);
-					throw;
-				}
-			}
-
-			public async override Task Subscribe(PriceUpdateSubscription request, IServerStreamWriter<PriceUpdate> responseStream, ServerCallContext context)
-			{
-				try
-				{
-					var cancel = context.CancellationToken;
-					var buffer = new BufferBlock<PriceUpdate>(
-						new DataflowBlockOptions { BoundedCapacity = 1000 });
-					var consumer = SendUpdates(buffer, responseStream, cancel);
-					var producer = ReceiveUpdates(request, buffer, cancel);
-					await Task.WhenAll(producer, consumer);
 				}
 				catch (Exception ex)
 				{
