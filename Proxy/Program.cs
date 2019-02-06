@@ -65,7 +65,7 @@ namespace Proxy
 				{
 					var cancel = context.CancellationToken;
 					var buffer = new BufferBlock<PriceUpdate>(
-						new DataflowBlockOptions { BoundedCapacity = 1000 });
+						new DataflowBlockOptions { BoundedCapacity = 1 });
 					var consumer = SendUpdates(buffer, responseStream, cancel);
 					var producer = ReceiveUpdates(request, buffer, cancel);
 					await Task.WhenAll(producer, consumer);
