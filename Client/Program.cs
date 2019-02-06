@@ -20,7 +20,7 @@ namespace Client
 			long m_receivedMessages = 0;
 
 			var subscriptions = 
-				Enumerable.Range(0,100)
+				Enumerable.Range(0,1000)
 					.Select(i => Task.Run(async () => {
 						var subscription = client.Subscribe(new PriceUpdateSubscription());
 						try
